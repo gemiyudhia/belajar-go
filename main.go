@@ -42,8 +42,33 @@ func main() {
 			Price: 3000,
 		},
 	}
-	showProducts(products)
 
-	total := calculateTotal(products)
-	fmt.Println("Total: ", total)
+mainLoop:
+	for {
+		fmt.Println()
+		fmt.Println("=== KASIRKU ===")
+		fmt.Println("1. Lihat Produk")
+		fmt.Println("2. Total Semua Produk")
+		fmt.Println("3. Keluar")
+		fmt.Println("Pilih: ")
+
+		var choice int
+		fmt.Scan(&choice)
+
+		switch choice {
+		case 1:
+			showProducts(products)
+
+		case 2:
+			total := calculateTotal(products)
+			fmt.Println("Total: ", total)
+
+		case 3:
+			fmt.Println("Terima Kasih!")
+			break mainLoop
+
+		default:
+			fmt.Println("Pilihan tidak valid!")
+		}
+	}
 }
