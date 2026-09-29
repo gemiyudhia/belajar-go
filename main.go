@@ -2,7 +2,32 @@ package main
 
 import "fmt"
 
+type Product struct {
+	ID int
+	Name string
+	Price int
+}
+
 func main() {
-	fmt.Println("=== KASIRKU GO ===")
-	fmt.Println("Aplikasi kasir pertama saya dengan GO")
+	products := []Product{
+		{
+			ID: 1,
+			Name: "Indomie Goreng",
+			Price: 2000,
+		},
+		{
+			ID: 2,
+			Name: "Teh Botol",
+			Price: 1000,
+		},
+		{
+			ID: 3,
+			Name: "Kopi",
+			Price: 3000,
+		},
+	}
+
+	for _, product := range products {
+		fmt.Println(product.Name, "-", product.Price)
+	}
 }
