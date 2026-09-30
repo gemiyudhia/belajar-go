@@ -33,21 +33,25 @@ func calculateTotal(products []Product) int {
 	return total
 }
 
-func findProduct(products []Product, id int) *Product {
+func findProduct(products []Product, id int) (*Product, error) {
 	for i := range products {
 		if products[i].ID == id {
-			return &products[i]
+			return &products[i], nil
 		}
 	}
 
-	return nil
+	return nil, fmt.Errorf("Product dengan ID %d tidak ditemukan.", id)
 }
 
-func addToCart(cart *[]CartItem, product *Product, quantity int) {
+func addToCart(cart *[]CartItem, product *Product, quantity int) error {
+	if quantity <= 0 {
+		return fmt.Errorf("Jumlah produk harus lebih dari 0")
+	}
+
 	for i := range *cart {
 		if (*cart)[i].Product.ID == product.ID {
 			(*cart)[i].Quantity += quantity
-			return
+			return nil
 		}
 	}
 
@@ -57,6 +61,8 @@ func addToCart(cart *[]CartItem, product *Product, quantity int) {
 	}
 
 	*cart = append(*cart, item)
+
+	return nil
 }
 
 func calculateCartTotal(cart []CartItem) int {
@@ -112,10 +118,10 @@ mainLoop:
 			var ProductID int
 			fmt.Scan(&ProductID)
 
-			product := findProduct(products, ProductID)
+			product, err := findProduct(products, ProductID)
 
-			if product == nil {
-				fmt.Println("Produk tidak ditemukan")
+			if err != nil {
+				fmt.Println("Error: ", err)
 				continue
 			}
 
@@ -123,7 +129,12 @@ mainLoop:
 			var quantity int
 			fmt.Scan(&quantity)
 
-			addToCart(&cart, product, quantity)
+			err = addToCart(&cart, product, quantity)
+
+			if err != nil {
+				fmt.Println("Error: ", err)
+				continue
+			}
 
 			fmt.Println("Produk berhasil ditambahkan ke keranjang")
 
