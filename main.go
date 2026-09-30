@@ -13,6 +13,10 @@ type CartItem struct {
 	Quantity int
 }
 
+func (item CartItem) subtotal() int {
+	return item.Product.Price * item.Quantity
+}
+
 func showProducts(products []Product) {
 	for _, product := range products {
 		fmt.Println(product.Name, "-", product.Price)
@@ -40,12 +44,27 @@ func findProduct(products []Product, id int) *Product {
 }
 
 func addToCart(cart *[]CartItem, product *Product, quantity int) {
+	for i := range *cart {
+		if (*cart)[i].Product.ID == product.ID {
+			(*cart)[i].Quantity += quantity
+			return
+		}
+	}
+
 	item := CartItem{
 		Product:  *product,
 		Quantity: quantity,
 	}
 
 	*cart = append(*cart, item)
+}
+
+func calculateCartTotal(cart []CartItem) int {
+	total := 0
+	for _, item := range cart {
+		total += item.subtotal()
+	}
+	return total
 }
 
 func main() {
@@ -117,7 +136,7 @@ mainLoop:
 			}
 
 			for _, item := range cart {
-				fmt.Println(item.Product.Name, "x", item.Quantity)
+				fmt.Println(item.Product.Name, "x", item.Quantity, "=", item.subtotal())
 			}
 
 		case 4:
