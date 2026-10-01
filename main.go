@@ -106,6 +106,25 @@ func processPayment(payment PaymentMethod, total int) error {
 	return payment.Pay(total)
 }
 
+type PaymentService struct {
+	paymentMethod PaymentMethod
+}
+
+func (s *PaymentService) Pay(total int) error {
+	return s.paymentMethod.Pay(total)
+}
+
+type DebitPayment struct {
+	CardNumber int
+}
+
+func (d DebitPayment) Pay(total int) error {
+	fmt.Println("Pembayaran Debit Berhasil!")
+	fmt.Println("Total: ", total)
+
+	return nil
+}
+
 func main() {
 	products := []Product{
 		{
@@ -127,19 +146,19 @@ func main() {
 
 	var cart []CartItem
 
-	cash := CashPayment{
-		Cash: 5000,
+	// cash := CashPayment{
+	// 	Cash: 10000,
+	// }
+	// qris := QrisPayment{}
+	debit := DebitPayment{
+		CardNumber: 1234,
 	}
 
-	err := processPayment(cash, 7500)
-
-	if err != nil {
-		fmt.Println("Error: ", err)
+	service := PaymentService{
+		paymentMethod: debit,
 	}
 
-	qris := QrisPayment{}
-
-	err = processPayment(qris, 7500)
+	err := service.Pay(7500)
 
 	if err != nil {
 		fmt.Println("Error: ", err)
