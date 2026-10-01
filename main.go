@@ -73,6 +73,39 @@ func calculateCartTotal(cart []CartItem) int {
 	return total
 }
 
+type PaymentMethod interface {
+	Pay(total int) error
+}
+
+type CashPayment struct {
+	Cash int
+}
+
+func (c CashPayment) Pay(total int) error {
+	if c.Cash < total {
+		return fmt.Errorf("Uang anda tidak cukup.")
+	}
+
+	change := c.Cash - total
+
+	fmt.Println("Pembayaran Berhasil!")
+	fmt.Println("Kembalian: ", change)
+
+	return nil
+}
+
+type QrisPayment struct{}
+
+func (q QrisPayment) Pay(total int) error {
+	fmt.Println("Pembayaran QRIS berhasil!")
+	fmt.Println("Total: ", total)
+	return nil
+}
+
+func processPayment(payment PaymentMethod, total int) error {
+	return payment.Pay(total)
+}
+
 func main() {
 	products := []Product{
 		{
@@ -93,6 +126,24 @@ func main() {
 	}
 
 	var cart []CartItem
+
+	cash := CashPayment{
+		Cash: 5000,
+	}
+
+	err := processPayment(cash, 7500)
+
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	qris := QrisPayment{}
+
+	err = processPayment(qris, 7500)
+
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
 
 mainLoop:
 	for {
