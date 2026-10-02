@@ -1,9 +1,13 @@
 package product
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type Product struct {
-	ID    int
+	ID    uuid.UUID
 	Name  string
 	Price int
 }
@@ -24,7 +28,7 @@ func CalculateTotal(products []Product) int {
 	return total
 }
 
-func FindProduct(products []Product, id int) (*Product, error) {
+func FindProduct(products []Product, id uuid.UUID) (*Product, error) {
 	for i := range products {
 		if products[i].ID == id {
 			return &products[i], nil

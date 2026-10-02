@@ -2,26 +2,27 @@ package main
 
 import (
 	"fmt"
-
 	"kasirku-go/cart"
 	"kasirku-go/payment"
 	"kasirku-go/product"
+
+	"github.com/google/uuid"
 )
 
 func main() {
 	products := []product.Product{
 		{
-			ID:    1,
+			ID:    uuid.New(),
 			Name:  "Indomie Goreng",
 			Price: 2000,
 		},
 		{
-			ID:    2,
+			ID:    uuid.New(),
 			Name:  "Teh Botol",
 			Price: 1000,
 		},
 		{
-			ID:    3,
+			ID:    uuid.New(),
 			Name:  "Kopi",
 			Price: 3000,
 		},
