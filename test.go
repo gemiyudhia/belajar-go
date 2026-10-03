@@ -12,22 +12,26 @@ func task(name string) {
 	}
 }
 
-func producer(ch chan string) {
-	ch <- "Indomie"
-	ch <- "Teh Botol"
-	ch <- "Kopi"
+func producer(ch chan<- int) {
+	ch <- 100
+	ch <- 200
+	ch <- 300
 
 	close(ch)
 }
 
+func consumer(ch <-chan int) {
+	for total := range ch {
+		fmt.Println("Total: ", total)
+	}
+}
+
 func main() {
-	ch := make(chan string)
+	ch := make(chan int)
 
 	go producer(ch)
 
-	for product := range ch {
-		fmt.Println("Produk: ", product)
-	}
+	consumer(ch)
 
 	fmt.Println("Selesai")
 }
