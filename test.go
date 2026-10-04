@@ -27,11 +27,27 @@ func consumer(ch <-chan int) {
 }
 
 func main() {
-	ch := make(chan int)
+	paymentCh := make(chan string)
+	reportCh := make(chan string)
 
-	go producer(ch)
+	go func() {
+		time.Sleep(2 * time.Second)
+		paymentCh <- "Pembayaran Berhasil"
+	}()
 
-	consumer(ch)
+	go func() {
+		time.Sleep(1 * time.Second)
+		reportCh <- "Laporan Selesai"
+	}()
 
-	fmt.Println("Selesai")
+	for i := 0; i < 2; i++ {
+		select {
+		case message := <-paymentCh:
+			fmt.Println(message)
+
+		case message := <-reportCh:
+			fmt.Println(message)
+		}
+	}
+
 }
