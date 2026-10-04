@@ -1,54 +1,50 @@
 package main
 
 import (
-	"context"
+	"errors"
 	"fmt"
-	"time"
 )
 
-func task(name string) {
-	for i := 1; i <= 3; i++ {
-		fmt.Println(name, i)
-		time.Sleep(500 * time.Millisecond)
-	}
+type ProductNotFoundError struct {
+	ProductID int
 }
 
-func producer(ch chan<- int) {
-	ch <- 100
-	ch <- 200
-	ch <- 300
-
-	close(ch)
+type error interface {
+	Error() string
 }
 
-func consumer(ch <-chan int) {
-	for total := range ch {
-		fmt.Println("Total: ", total)
-	}
+func (e ProductNotFoundError) Error() string {
+	return fmt.Sprintf(
+		"produk dengan id %d tidak ditemukan",
+		e.ProductID,
+	)
 }
 
-func worker(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			fmt.Println("Worker dihentikan")
-			return
-
-		default:
-			fmt.Println("Worker sedang bekerja")
-			time.Sleep(500 * time.Millisecond)
+func findProduct(id int) error {
+	if id != 1 {
+		return ProductNotFoundError{
+			ProductID: id,
 		}
 	}
+
+	return nil
 }
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
+	err := findProduct(10)
 
-	go worker(ctx)
+	if err != nil {
+		fmt.Println("Error: ", err)
 
-	time.Sleep(2 * time.Second)
+		var productNotFoundError ProductNotFoundError
 
-	cancel()
+		if errors.As(err, &productNotFoundError) {
+			fmt.Println("Jenis error: ProductNotFoundError")
+			fmt.Println("ID produk: ", productNotFoundError.ProductID)
+		}
 
-	time.Sleep(1 * time.Second)
+		return
+	}
+
+	fmt.Println("Produk Ditemukan")
 }
