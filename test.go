@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -26,28 +27,28 @@ func consumer(ch <-chan int) {
 	}
 }
 
-func main() {
-	paymentCh := make(chan string)
-	reportCh := make(chan string)
-
-	go func() {
-		time.Sleep(2 * time.Second)
-		paymentCh <- "Pembayaran Berhasil"
-	}()
-
-	go func() {
-		time.Sleep(1 * time.Second)
-		reportCh <- "Laporan Selesai"
-	}()
-
-	for i := 0; i < 2; i++ {
+func worker(ctx context.Context) {
+	for {
 		select {
-		case message := <-paymentCh:
-			fmt.Println(message)
+		case <-ctx.Done():
+			fmt.Println("Worker dihentikan")
+			return
 
-		case message := <-reportCh:
-			fmt.Println(message)
+		default:
+			fmt.Println("Worker sedang bekerja")
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
+}
 
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go worker(ctx)
+
+	time.Sleep(2 * time.Second)
+
+	cancel()
+
+	time.Sleep(1 * time.Second)
 }
