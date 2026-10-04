@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"kasirku-go/cart"
-	"kasirku-go/payment"
 	"kasirku-go/product"
 
 	"github.com/google/uuid"
@@ -27,46 +25,31 @@ func main() {
 			Price: 3000,
 		},
 	}
-
-	items := []cart.Item{
-		{
-			Product:  products[0],
-			Quantity: 2,
-		},
-		{
-			Product:  products[1],
-			Quantity: 1,
-		},
+	service := product.Service{
+		Products: products,
 	}
 
-	fmt.Println("=== KASIRKU ===")
-
-	for _, item := range items {
-		fmt.Println(
-			item.Product.Name,
-			"X",
-			item.Quantity,
-			"=",
-			item.Subtotal(),
-		)
+	for _, p := range products {
+		fmt.Println(p.ID, "-", p.Name, "-", p.Price)
 	}
 
-	total := cart.Total(items)
+	productID := products[0].ID
 
-	fmt.Println("Total: ", total)
-
-	debit := payment.DebitPayment{
-		CardNumber: 123,
-	}
-
-	service := payment.PaymentService{
-		PaymentMethod: debit,
-	}
-
-	err := service.Pay(total)
+	found, err := service.FindByID(productID)
 
 	if err != nil {
-		fmt.Println("Error", err)
+		fmt.Println("Error: ", err)
+		return
 	}
+
+	products = service.GetAll()
+
+	for _, p := range products {
+		fmt.Println(p.Name, p.Price)
+	}
+
+	fmt.Println("Produk ditemukan:")
+	fmt.Println(found.Name)
+	fmt.Println(found.Price)
 
 }

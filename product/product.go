@@ -12,6 +12,10 @@ type Product struct {
 	Price int
 }
 
+type Service struct {
+	Products []Product
+}
+
 func ShowProducts(products []Product) {
 	for _, product := range products {
 		fmt.Println(product.Name, "-", product.Price)
@@ -37,3 +41,18 @@ func FindProduct(products []Product, id uuid.UUID) (*Product, error) {
 
 	return nil, fmt.Errorf("Product dengan ID %d tidak ditemukan.", id)
 }
+
+func (s Service) FindByID(id uuid.UUID) (*Product, error) {
+	for i := range s.Products {
+		if s.Products[i].ID == id {
+			return &s.Products[i], nil
+		}
+	}
+
+	return nil, fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
+}
+
+func (s Service) GetAll() []Product {
+	return s.Products
+}
+
