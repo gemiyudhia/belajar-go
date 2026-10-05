@@ -1,9 +1,15 @@
 package product
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+)
+
+var (
+	ErrEmptyName    = errors.New("nama produk tidak boleh kosong")
+	ErrInvalidPrice = errors.New("harga produk harus lebih dari 0")
 )
 
 type Product struct {
@@ -14,6 +20,18 @@ type Product struct {
 
 type Service struct {
 	Products []Product
+}
+
+func validateProduct(name string, price int) error {
+	if name == "" {
+		return ErrEmptyName
+	}
+
+	if price <= 0 {
+		return ErrInvalidPrice
+	}
+
+	return nil
 }
 
 func ShowProducts(products []Product) {
@@ -56,7 +74,12 @@ func (s Service) GetAll() []Product {
 	return s.Products
 }
 
-func (s *Service) Create(name string, price int) Product {
+func (s *Service) Create(name string, price int) (Product, error) {
+	err := validateProduct(name, price)
+	if err != nil {
+		return Product{}, err
+	}
+
 	newProduct := Product{
 		ID:    uuid.New(),
 		Name:  name,
@@ -65,10 +88,16 @@ func (s *Service) Create(name string, price int) Product {
 
 	s.Products = append(s.Products, newProduct)
 
-	return newProduct
+	return newProduct, nil
 }
 
 func (s *Service) Update(id uuid.UUID, name string, price int) error {
+	err := validateProduct(name, price)
+
+	if err != nil {
+		return err
+	}
+
 	for i := range s.Products {
 		if s.Products[i].ID == id {
 			s.Products[i].Name = name
@@ -82,14 +111,13 @@ func (s *Service) Update(id uuid.UUID, name string, price int) error {
 }
 
 func (s *Service) Delete(id uuid.UUID) error {
-	for i := range s.Products{
+	for i := range s.Products {
 		if s.Products[i].ID == id {
-			s.Products = append(s.Products[:i], s.Products[i+1:]... )
-		
-		return nil
+			s.Products = append(s.Products[:i], s.Products[i+1:]...)
+
+			return nil
 		}
 	}
-return fmt.Errorf("Produk dengan ID %s tidak ditemukan", id)
-
+	return fmt.Errorf("Produk dengan ID %s tidak ditemukan", id)
 
 }

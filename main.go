@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"kasirku-go/product"
 
@@ -29,52 +30,55 @@ func main() {
 	}
 
 	fmt.Println("=== AWAL ===")
-
 	for _, p := range service.GetAll() {
 		fmt.Println(p.Name, p.Price)
 	}
 
-	fmt.Println("=== CREATE ===")
+	fmt.Println("\n=== UJI COBA VALIDASI ERROR ===")
+	// Menguji input validasi yang gagal tanpa mengganggu alur utama
+	_, errInvalid := service.Create("", 0)
+	if errors.Is(errInvalid, product.ErrEmptyName) {
+		fmt.Println("Validasi berhasil: Nama produk wajib diisi")
+	} else if errInvalid != nil {
+		fmt.Println("Error validasi:", errInvalid)
+	}
 
-	newProduct := service.Create("Kopi Hitam", 2000)
+	fmt.Println("\n=== CREATE ===")
+	newProduct, err := service.Create("", -2000)
+	if err != nil {
+		fmt.Println("Error saat membuat produk:", err)
+		return
+	}
+	fmt.Println("Berhasil dibuat:", newProduct.Name, newProduct.Price)
 
-	fmt.Println(newProduct.Name, newProduct.Price)
-
-	fmt.Println("=== UPDATE ===")
-	err := service.Update(
+	fmt.Println("\n=== UPDATE ===")
+	err = service.Update(
 		newProduct.ID,
 		"Kopi Susu",
-		5000,
+		0,
 	)
-
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println("Error saat update:", err)
 		return
 	}
 
 	found, err := service.FindByID(newProduct.ID)
-
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println("Error saat mencari produk:", err)
 		return
 	}
+	fmt.Println("Setelah diupdate:", found.Name, found.Price)
 
-	fmt.Println(found.Name, found.Price)
-
-	fmt.Println("=== DELETE ===")
-
+	fmt.Println("\n=== DELETE ===")
 	err = service.Delete(newProduct.ID)
-
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println("Error saat menghapus produk:", err)
 		return
 	}
+	fmt.Println("Produk berhasil dihapus")
 
-	fmt.Println("Produk berhasil disimpan")
-	fmt.Println("=== AKHIR ===")
-
+	fmt.Println("\n=== AKHIR ===")
 	for _, p := range service.GetAll() {
 		fmt.Println(p.Name, p.Price)
 	}
-
 }
