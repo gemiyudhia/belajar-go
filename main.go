@@ -8,48 +8,73 @@ import (
 )
 
 func main() {
-	products := []product.Product{
-		{
-			ID:    uuid.New(),
-			Name:  "Indomie Goreng",
-			Price: 2000,
-		},
-		{
-			ID:    uuid.New(),
-			Name:  "Teh Botol",
-			Price: 1000,
-		},
-		{
-			ID:    uuid.New(),
-			Name:  "Kopi",
-			Price: 3000,
-		},
-	}
 	service := product.Service{
-		Products: products,
+		Products: []product.Product{
+			{
+				ID:    uuid.New(),
+				Name:  "Indomie Goreng",
+				Price: 2000,
+			},
+			{
+				ID:    uuid.New(),
+				Name:  "Teh Botol",
+				Price: 1000,
+			},
+			{
+				ID:    uuid.New(),
+				Name:  "Kopi",
+				Price: 3000,
+			},
+		},
 	}
 
-	for _, p := range products {
-		fmt.Println(p.ID, "-", p.Name, "-", p.Price)
+	fmt.Println("=== AWAL ===")
+
+	for _, p := range service.GetAll() {
+		fmt.Println(p.Name, p.Price)
 	}
 
-	productID := products[0].ID
+	fmt.Println("=== CREATE ===")
 
-	found, err := service.FindByID(productID)
+	newProduct := service.Create("Kopi Hitam", 2000)
+
+	fmt.Println(newProduct.Name, newProduct.Price)
+
+	fmt.Println("=== UPDATE ===")
+	err := service.Update(
+		newProduct.ID,
+		"Kopi Susu",
+		5000,
+	)
 
 	if err != nil {
 		fmt.Println("Error: ", err)
 		return
 	}
 
-	products = service.GetAll()
+	found, err := service.FindByID(newProduct.ID)
 
-	for _, p := range products {
-		fmt.Println(p.Name, p.Price)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
 	}
 
-	fmt.Println("Produk ditemukan:")
-	fmt.Println(found.Name)
-	fmt.Println(found.Price)
+	fmt.Println(found.Name, found.Price)
+
+	fmt.Println("=== DELETE ===")
+
+	err = service.Delete(newProduct.ID)
+
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
+	}
+
+	fmt.Println("Produk berhasil disimpan")
+	fmt.Println("=== AKHIR ===")
+
+	for _, p := range service.GetAll() {
+		fmt.Println(p.Name, p.Price)
+	}
 
 }
