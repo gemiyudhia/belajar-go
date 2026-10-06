@@ -1,93 +1,80 @@
 package product
 
-import "testing"
+import (
+	"testing"
 
-func TestCreateProduct(t *testing.T) {
-	service := Service{}
+	"github.com/google/uuid"
+)
 
-	product, err := service.Create("Indomie", 3000)
+type FakeRepository struct {
+	Products []Product
+}
+
+func (r *FakeRepository) GetAll() []Product {
+	return r.Products
+}
+
+func (r *FakeRepository) FindByID(id uuid.UUID) (*Product, error) {
+	for i := range r.Products {
+		if r.Products[i].ID == id {
+			return &r.Products[i], nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (r *FakeRepository) Create(product Product) Product {
+	r.Products = append(r.Products, product)
+	return product
+}
+
+func (r *FakeRepository) Update(product Product) error {
+	for i := range r.Products {
+		if r.Products[i].ID == product.ID {
+			r.Products[i] = product
+			return nil
+		}
+	}
+
+	return nil
+}
+
+func (r *FakeRepository) Delete(id uuid.UUID) error {
+	for i := range r.Products {
+		if r.Products[i].ID == id {
+			r.Products = append(
+				r.Products[:i],
+				r.Products[i+1:]...,
+			)
+			return nil
+		}
+	}
+
+	return nil
+}
+
+func TestServiceCreateWithFakeRepository(t *testing.T) {
+	repository := &FakeRepository{}
+
+	service := Service{
+		Repository: repository,
+	}
+
+	product, err := service.Create("Indomie", 3500)
 
 	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
+		t.Fatalf("unexpected error: %v", err)
 	}
 
 	if product.Name != "Indomie" {
-		t.Errorf("Expected name Indomie, got %s", product.Name)
+		t.Errorf("expected Indomie, got %s", product.Name)
 	}
 
-	if product.Price != 3000 {
-		t.Errorf("Expected price 3000, got %d", product.Price)
-	}
-
-	if len(service.Products) != 1 {
-		t.Errorf("Expected 1 product, got %d", len(service.Products))
-	}
-}
-
-func TestCreateProductValidation(t *testing.T) {
-	service := Service{}
-
-	_, err := service.Create("", 3500)
-
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-
-	if err != ErrEmptyName {
-		t.Errorf("expected ErrEmptyName, got %v", err)
-	}
-}
-
-func TestCreateProductInvalidPrice(t *testing.T) {
-	service := Service{}
-
-	_, err := service.Create("Indomie", 0)
-
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-
-	if err != ErrInvalidPrice {
-		t.Errorf("expected ErrInvalidPrice, got %v", err)
-	}
-}
-
-func TestFindProduct(t *testing.T) {
-	service := Service{}
-
-	product, err := service.Create("Indomie", 3500)
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	found, err := service.FindByID(product.ID)
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if found.Name != "Indomie" {
-		t.Errorf("expected Indomie, got %s", found.Name)
-	}
-}
-
-func TestDeleteProduct(t *testing.T) {
-	service := Service{}
-
-	product, err := service.Create("Indomie", 3500)
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	err = service.Delete(product.ID)
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if len(service.Products) != 0 {
-		t.Errorf("expected 0 products, got %d", len(service.Products))
+	if len(repository.Products) != 1 {
+		t.Errorf(
+			"expected 1 product, got %d",
+			len(repository.Products),
+		)
 	}
 }

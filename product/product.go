@@ -19,7 +19,7 @@ type Product struct {
 }
 
 type Service struct {
-	Products []Product
+	Repository Repository
 }
 
 func validateProduct(name string, price int) error {
@@ -33,23 +33,6 @@ func validateProduct(name string, price int) error {
 
 	return nil
 }
-
-func ShowProducts(products []Product) {
-	for _, product := range products {
-		fmt.Println(product.Name, "-", product.Price)
-	}
-}
-
-func CalculateTotal(products []Product) int {
-	total := 0
-
-	for _, product := range products {
-		total += product.Price
-	}
-
-	return total
-}
-
 func FindProduct(products []Product, id uuid.UUID) (*Product, error) {
 	for i := range products {
 		if products[i].ID == id {
@@ -60,22 +43,17 @@ func FindProduct(products []Product, id uuid.UUID) (*Product, error) {
 	return nil, fmt.Errorf("Product dengan ID %d tidak ditemukan.", id)
 }
 
-func (s Service) FindByID(id uuid.UUID) (*Product, error) {
-	for i := range s.Products {
-		if s.Products[i].ID == id {
-			return &s.Products[i], nil
-		}
-	}
-
-	return nil, fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
+func (s *Service) FindByID(id uuid.UUID) (*Product, error) {
+	return s.Repository.FindByID(id)
 }
 
-func (s Service) GetAll() []Product {
-	return s.Products
+func (s *Service) GetAll() []Product {
+	return s.Repository.GetAll()
 }
 
 func (s *Service) Create(name string, price int) (Product, error) {
 	err := validateProduct(name, price)
+
 	if err != nil {
 		return Product{}, err
 	}
@@ -86,9 +64,9 @@ func (s *Service) Create(name string, price int) (Product, error) {
 		Price: price,
 	}
 
-	s.Products = append(s.Products, newProduct)
+	product := s.Repository.Create(newProduct)
 
-	return newProduct, nil
+	return product, nil
 }
 
 func (s *Service) Update(id uuid.UUID, name string, price int) error {
@@ -98,26 +76,16 @@ func (s *Service) Update(id uuid.UUID, name string, price int) error {
 		return err
 	}
 
-	for i := range s.Products {
-		if s.Products[i].ID == id {
-			s.Products[i].Name = name
-			s.Products[i].Price = price
-
-			return nil
-		}
+	product := Product{
+		ID:    id,
+		Name:  name,
+		Price: price,
 	}
 
-	return fmt.Errorf("Produk dengan ID %s tidak ditemukan", id)
+	return s.Repository.Update(product)
 }
 
 func (s *Service) Delete(id uuid.UUID) error {
-	for i := range s.Products {
-		if s.Products[i].ID == id {
-			s.Products = append(s.Products[:i], s.Products[i+1:]...)
-
-			return nil
-		}
-	}
-	return fmt.Errorf("Produk dengan ID %s tidak ditemukan", id)
+	return s.Repository.Delete(id)
 
 }
