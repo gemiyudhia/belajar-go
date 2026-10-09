@@ -7,9 +7,9 @@ import (
 )
 
 type Repository interface {
-	GetAll() []Product
+	GetAll() ([]Product, error)
 	FindByID(id uuid.UUID) (*Product, error)
-	Create(product Product) Product
+	Create(product Product) (Product, error)
 	Update(product Product) error
 	Delete(id uuid.UUID) error
 }
@@ -18,8 +18,8 @@ type MemoryRepository struct {
 	Products []Product
 }
 
-func (r *MemoryRepository) GetAll() []Product {
-	return r.Products
+func (r *MemoryRepository) GetAll() ([]Product, error) {
+	return r.Products, nil
 }
 
 func (r *MemoryRepository) FindByID(id uuid.UUID) (*Product, error) {
@@ -35,10 +35,10 @@ func (r *MemoryRepository) FindByID(id uuid.UUID) (*Product, error) {
 	)
 }
 
-func (r *MemoryRepository) Create(product Product) Product {
+func (r *MemoryRepository) Create(product Product) (Product, error) {
 	r.Products = append(r.Products, product)
 
-	return product
+	return product, nil
 }
 
 func (r *MemoryRepository) Update(product Product) error {

@@ -47,7 +47,7 @@ func (s *Service) FindByID(id uuid.UUID) (*Product, error) {
 	return s.Repository.FindByID(id)
 }
 
-func (s *Service) GetAll() []Product {
+func (s *Service) GetAll() ([]Product, error) {
 	return s.Repository.GetAll()
 }
 
@@ -64,9 +64,7 @@ func (s *Service) Create(name string, price int) (Product, error) {
 		Price: price,
 	}
 
-	product := s.Repository.Create(newProduct)
-
-	return product, nil
+	return s.Repository.Create(newProduct)
 }
 
 func (s *Service) Update(id uuid.UUID, name string, price int) error {

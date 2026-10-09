@@ -10,8 +10,8 @@ type FakeRepository struct {
 	Products []Product
 }
 
-func (r *FakeRepository) GetAll() []Product {
-	return r.Products
+func (r *FakeRepository) GetAll() ([]Product, error) {
+	return r.Products, nil
 }
 
 func (r *FakeRepository) FindByID(id uuid.UUID) (*Product, error) {
@@ -24,9 +24,9 @@ func (r *FakeRepository) FindByID(id uuid.UUID) (*Product, error) {
 	return nil, nil
 }
 
-func (r *FakeRepository) Create(product Product) Product {
+func (r *FakeRepository) Create(product Product) (Product, error) {
 	r.Products = append(r.Products, product)
-	return product
+	return product, nil
 }
 
 func (r *FakeRepository) Update(product Product) error {
