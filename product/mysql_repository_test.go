@@ -1,6 +1,7 @@
 package product
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -56,6 +57,46 @@ func TestMySQLRepositoryCreate(t *testing.T) {
 			newProduct.Price,
 			createdProduct.Price,
 		)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("ekspektasi database tidak terpenuhi: %v", err)
+	}
+}
+
+func TestMySQLRepositoryCreateError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("gagal membuat mock database: %v", err)
+	}
+	defer db.Close()
+
+	repository := &MySQLRepository{
+		DB: db,
+	}
+
+	newProduct := Product{
+		ID:    uuid.New(),
+		Name:  "Indomie",
+		Price: 3500,
+	}
+
+	mock.ExpectExec("INSERT INTO products").
+		WithArgs(
+			newProduct.ID.String(),
+			newProduct.Name,
+			newProduct.Price,
+		).
+		WillReturnError(fmt.Errorf("database error"))
+
+	_, err = repository.Create(newProduct)
+
+	if err == nil {
+		t.Fatal("seharusnya mengembalikan error")
+	}
+
+	if err.Error() != "database error" {
+		t.Errorf("error tidak sesuai: %v", err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
